@@ -1,7 +1,14 @@
-```markdown
-# design-carousel-service
+# Design Carousel Service
 
 **A microservice for managing and serving an image carousel, written in Go using Gin and Logrus.**
+
+This is used on the https://dasmlab.org 'live' to feed the live content in a "pseudo realtime" manner to the site's Vue.js Component.
+
+This service provides a live "Carousel" of media (A Queue) that can be obtained programatically via clients.  With the URLs in the Carousel, the media can be fetched and otherwise instrumented live by clients via the API.
+
+Includes a Swagger Page API SDK page at   http://ip:port/swagger/index.html that lets you try the APIs out "live".
+
+**[Live Site Active Link]**(https://design-carousel.svc.dasmlab.org/swagger/index.html)
 
 ---
 
@@ -87,4 +94,4 @@ design-carousel-service/
 Contact us if you want to contribute and/or fork, we would love to hear what you're using it for! :)
 
 ## License
-AAL (see LICENSE)
+see LICENSES/dasmlab.license for information
