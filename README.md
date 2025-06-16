@@ -23,7 +23,7 @@ flowchart TD
       B[DesignCarousel Service]
       B1[/carousel GET/POST/DELETE/]
       B2[/serve API]
-      B3[In-Memory Queue]
+      B3[InMemory Queue]
       B4[ImageStore]
     end
 
