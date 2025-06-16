@@ -15,7 +15,6 @@ Includes a Swagger Page API SDK page at   http://ip:port/swagger/index.html that
 ## High Level Overview
 
 ```mermaid
-```mermaid
 flowchart TD
   subgraph Client
     A[Quasar/Vue Frontend: DesignCarousel.vue]
