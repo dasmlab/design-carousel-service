@@ -21,10 +21,10 @@ flowchart TD
     end
     subgraph Service
       B[DesignCarousel Service]
-      B1[/carousel<br>GET/POST/DELETE/]
-      B2[/serve?id=xxx<br>API Path]
-      B3[In-Memory Queue<br>Slides]
-      B4[Image Store<br>optimized images]
+      B1[/carousel GET/POST/DELETE/]
+      B2[/serve?id=xxx API Path]
+      B3[In-Memory Queue (Slides)]
+      B4[Image Store optimized images]
     end
 
     A -- fetches list --> B1
