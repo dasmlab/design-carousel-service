@@ -15,23 +15,24 @@ Includes a Swagger Page API SDK page at   http://ip:port/swagger/index.html that
 ## High Level Overview
 
 ```mermaid
+```mermaid
 flowchart TD
   subgraph Client
-    A[Quasar/Vue Frontend: DesignCarousel.vue]
+    A[Quasar Vue Frontend: DesignCarousel.vue]
   end
   subgraph Service
     B[DesignCarousel Service]
-    B1[/carousel endpoint (GET/POST/DELETE)]
-    B2[/serve?id=xxx endpoint]
+    B1[carousel endpoint GET POST DELETE]
+    B2[serve id API endpoint]
     B3[In-Memory Queue of Slides]
-    B4[Image Store: Optimized Images]
+    B4[Image Store Optimized Images]
   end
 
   A -- fetches list --> B1
   B1 -- returns JSON array of slides --> A
-  A -- requests image (src=/serve?id=xxx) --> B2
+  A -- requests image from serve id --> B2
   B2 -- streams image data --> A
-  B1 -- reads/writes --> B3
+  B1 -- reads and writes --> B3
   B1 -- writes images --> B4
   B2 -- reads --> B4
 ```
