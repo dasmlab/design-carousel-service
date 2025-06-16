@@ -1,0 +1,124 @@
+basePath: /
+definitions:
+  api.Slide:
+    properties:
+      created_at:
+        example: "2025-06-15T20:12:34Z"
+        type: string
+      id:
+        example: abc123
+        type: string
+      image_url:
+        example: /serve?id=abc123
+        type: string
+      source_url:
+        example: https://en.wikipedia.org/wiki/Fronalpstock
+        type: string
+      title:
+        example: Swiss Alps
+        type: string
+    type: object
+info:
+  contact: {}
+  description: APIs for Image Carousel Management
+  title: DASMLAB DesignCarousel Service
+  version: 0.0.1
+paths:
+  /carousel:
+    get:
+      description: Returns the full queue of slide entries
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/api.Slide'
+            type: array
+      summary: List all slides in the carousel
+      tags:
+      - carousel
+    post:
+      consumes:
+      - application/json
+      - multipart/form-data
+      description: Adds a slide entry. Accepts multipart form (file+meta) or JSON.
+      parameters:
+      - description: Slide Title
+        in: formData
+        name: title
+        type: string
+      - description: Source URL
+        in: formData
+        name: source_url
+        type: string
+      - description: Image file (png/jpeg)
+        in: formData
+        name: image
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.Slide'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Add a new slide (JSON or file upload)
+      tags:
+      - carousel
+  /carousel/{id}:
+    delete:
+      description: Removes a slide from the carousel by its unique ID
+      parameters:
+      - description: Slide ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a slide
+      tags:
+      - carousel
+  /serve:
+    get:
+      description: Streams the optimized (WebP) image for the given slide ID
+      parameters:
+      - description: Slide ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - image/webp
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Serve the optimized image by slide ID
+      tags:
+      - serve
+swagger: "2.0"

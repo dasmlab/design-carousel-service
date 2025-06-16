@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: design-carousel-service
+  namespace: design-carousel-service-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: design-carousel-service
+  template:
+    metadata:
+      labels:
+        app: design-carousel-service
+    spec:
+      imagePullSecrets:
+        - name: dasmlab-ghcr-pull
+      containers:
+        - name: design-carousel-service
+          image: ghcr.io/dasmlab/design-carousel-service:__VERSION__
+          imagePullPolicy: Always
+          ports:
+            - name: api
+              containerPort: 10022
+              protocol: TCP
+            - name: metrics
+              containerPort: 9222
+              protocol: TCP
+          env:
+            - name: APP_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: design-carousel-service-vars
+                  key: APP_ID
+            - name: INSTALLATION_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: design-carousel-service-vars
+                  key: INSTALLATION_ID
+            - name: PEM_CONTENTS
+              valueFrom:
+                secretKeyRef:
+                  name: design-carousel-service-secrets
+                  key: PEM_CONTENTS
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: design-carousel-service
+  namespace: design-carousel-service-system
+  annotations:
+    metallb.universe.tf/ip-allocated-from-pool: bgp-pool
+    prometheus.io/scrape: "true" # ADDED FOR USE WITH GRAFANA ALLOY
+    prometheus.io/port: "9222" # ADDED FOR USE WITH GRAFANA ALLOY
+    prometheus.io/path: "/metrics" # ADDED FOR USE WITH GRAFANA ALLOY
+spec:
+  selector:
+    app: design-carousel-service
+  type: LoadBalancer
+  loadBalancerIP: 192.168.19.161
+  externalTrafficPolicy: Cluster
+  ports:
+    - name: api
+      port: 10022       # External LB port
+      targetPort: api  # Matches named container port (80)
+      protocol: TCP
+    - name: metrics
+      port: 9222
+      targetPort: metrics
+      protocol: TCP
+

@@ -1,0 +1,186 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "APIs for Image Carousel Management",
+        "title": "DASMLAB DesignCarousel Service",
+        "contact": {},
+        "version": "0.0.1"
+    },
+    "basePath": "/",
+    "paths": {
+        "/carousel": {
+            "get": {
+                "description": "Returns the full queue of slide entries",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "carousel"
+                ],
+                "summary": "List all slides in the carousel",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/api.Slide"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Adds a slide entry. Accepts multipart form (file+meta) or JSON.",
+                "consumes": [
+                    "application/json",
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "carousel"
+                ],
+                "summary": "Add a new slide (JSON or file upload)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Slide Title",
+                        "name": "title",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Source URL",
+                        "name": "source_url",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Image file (png/jpeg)",
+                        "name": "image",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/api.Slide"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/carousel/{id}": {
+            "delete": {
+                "description": "Removes a slide from the carousel by its unique ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "carousel"
+                ],
+                "summary": "Delete a slide",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Slide ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/serve": {
+            "get": {
+                "description": "Streams the optimized (WebP) image for the given slide ID",
+                "produces": [
+                    "image/webp"
+                ],
+                "tags": [
+                    "serve"
+                ],
+                "summary": "Serve the optimized image by slide ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Slide ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "api.Slide": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2025-06-15T20:12:34Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "abc123"
+                },
+                "image_url": {
+                    "type": "string",
+                    "example": "/serve?id=abc123"
+                },
+                "source_url": {
+                    "type": "string",
+                    "example": "https://en.wikipedia.org/wiki/Fronalpstock"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Swiss Alps"
+                }
+            }
+        }
+    }
+}

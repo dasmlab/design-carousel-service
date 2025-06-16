@@ -1,0 +1,109 @@
+name: DesignCarousel Service CX Pipeline (Isolated Builds with Docker Networks)
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  cx-pipeline:
+    runs-on: self-hosted
+    steps:
+
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Setup Build Metadata
+      id: vars
+      run: |
+        echo "COMMIT_ID=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        echo "VERSION_TAG=v$(date +'%Y.%m.%d')-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        echo "NETWORK_NAME=design-carousel-net-${GITHUB_SHA::8}" >> $GITHUB_ENV
+        echo "IMAGE_TAG=design-carousel_image:${GITHUB_SHA::8}" >> $GITHUB_ENV
+        echo "CONTAINER_NAME=design-carousel_instance-${GITHUB_SHA::8}" >> $GITHUB_ENV
+        echo "API_PORT=10022" >> $GITHUB_ENV
+        echo "METRICS_PORT=9222" >> $GITHUB_ENV
+
+    - name: Build Phase
+      run: |
+        docker build -t $IMAGE_TAG .
+
+    - name: Create Isolated Docker Network
+      run: |
+        docker network create $NETWORK_NAME || true
+
+    - name: Run Phase (App Container)
+      env:
+        APP_ID: ${{ vars.APP_ID }}
+        INSTALLATION_ID: ${{ vars.INSTALLATION_ID }}
+        PEM_CONTENTS: $${{ secrets.PEM_CONTENTS }}
+        API_PORT: "10022"
+        METRICS_PORT: "9222"
+      run: |
+        echo "Removing Any previous possibilities.."
+        docker rm -f $CONTAINER_NAME 2>/dev/null || true
+        echo "Starting up App... (docker run)"
+        docker run -d  \
+          --name $CONTAINER_NAME \
+          --network $NETWORK_NAME \
+          $IMAGE_TAG
+
+        echo "Sleeping to let things start for 5 seconds... "
+        sleep 5
+
+        echo "Display the docker setups"
+        docker ps -a
+
+        echo "Display startup logs"
+        docker logs $CONTAINER_NAME
+
+        echo "Quick test of endpoints"
+        docker exec $CONTAINER_NAME curl -f http://localhost:$API_PORT/get || (echo "API failed health check on port ${API_PORT}" && exit 1)
+        docker exec $CONTAINER_NAME curl -f http://localhost:$METRICS_PORT/metrics || (echo "METRICS failed health check" && exit 1)
+
+    - name: Secure Phase (Stub)
+      run: |
+        echo "Run SAST/DAST tools here using $CONTAINER_NAME on $NETWORK_NAME"
+        # docker run --rm --network $NETWORK_NAME dasmlab-security-suite:latest
+        exit 0
+
+    - name: Test Phase (Stub)
+      run: |
+        echo "Run Selenium/Playwright/etc against $CONTAINER_NAME on $NETWORK_NAME"
+        # docker run --rm --network $NETWORK_NAME dasmlab-test-suite:latest
+        exit 0
+
+    - name: Publish Phase
+      run: |
+        docker tag $IMAGE_TAG ghcr.io/dasmlab/design-carousel-service:${VERSION_TAG}
+        echo "${{ secrets.DASMLAB_GHCR_PAT }}" | docker login ghcr.io -u dasmlab --password-stdin
+        docker push ghcr.io/dasmlab/design-carousel-service:${VERSION_TAG}
+
+    - name: GitOps Sync (Deploy) Phase
+      run: |
+        # Clone & update repo as usual...
+        git config --global user.name "dasmlab-bot"
+        git config --global user.email "ci@dasmlab.org"
+        git clone https://x-access-token:${{ secrets.DASMLAB_GHCR_PAT }}@github.com/lmcdasm/dasmlab-live-cicd.git
+
+        DEPLOY_DIR="dasmlab-live-cicd/clusters/dasmlab-prod-1/design-carousel-service/live"
+        ARCHIVE_DIR="dasmlab-live-cicd/clusters/dasmlab-prod-1/design-carousel-service/archived"
+        mkdir -p "$ARCHIVE_DIR"
+
+        # Move old manifests to archive
+        find "$DEPLOY_DIR" -maxdepth 1 -type f -name 'design-carousel-service-v*.yaml' -exec mv {} "$ARCHIVE_DIR"/ \;
+
+        # Copy new manifests
+        cp generated.yaml "$DEPLOY_DIR/design-carousel-service-${VERSION_TAG}.yaml"
+
+        cd dasmlab-live-cicd
+        git add .
+        git commit -m "Auto-publish design-carousel-service ${VERSION_TAG}"
+        git push
+
+
+    - name: Teardown (Clean Containers & Network)
+      if: always()
+      run: |
+        docker rm -f $CONTAINER_NAME || true
+        docker network rm $NETWORK_NAME || true
+
