@@ -57,7 +57,7 @@ jobs:
         docker logs $CONTAINER_NAME
 
         echo "Quick test of endpoints"
-        docker exec $CONTAINER_NAME curl -f http://localhost:$API_PORT/get || (echo "API failed health check on port ${API_PORT}" && exit 1)
+        docker exec $CONTAINER_NAME curl -f http://localhost:$API_PORT/isalive || (echo "API failed health check on port ${API_PORT}" && exit 1)
         docker exec $CONTAINER_NAME curl -f http://localhost:$METRICS_PORT/metrics || (echo "METRICS failed health check" && exit 1)
 
     - name: Secure Phase (Stub)

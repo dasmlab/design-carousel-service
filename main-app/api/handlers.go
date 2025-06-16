@@ -71,6 +71,21 @@ func ListSlides(c *gin.Context) {
 	c.JSON(http.StatusOK, slides)
 }
 
+// IsAlive godoc
+// @Summary Simple Health Check if the Service is "Up"
+// @Description Return a 200 OK if the service is alive
+// @Tags carousel
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Router /isalive [get]
+func IsAlive(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H {
+		"status": "alive",
+	})
+}
+
+
+
 // AddSlide supports both JSON and multipart file upload
 
 // @Summary      Add a new slide (JSON or file upload)
