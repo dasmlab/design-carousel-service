@@ -26,22 +26,6 @@ spec:
             - name: metrics
               containerPort: 9222
               protocol: TCP
-          env:
-            - name: APP_ID
-              valueFrom:
-                configMapKeyRef:
-                  name: design-carousel-service-vars
-                  key: APP_ID
-            - name: INSTALLATION_ID
-              valueFrom:
-                configMapKeyRef:
-                  name: design-carousel-service-vars
-                  key: INSTALLATION_ID
-            - name: PEM_CONTENTS
-              valueFrom:
-                secretKeyRef:
-                  name: design-carousel-service-secrets
-                  key: PEM_CONTENTS
 
 ---
 
