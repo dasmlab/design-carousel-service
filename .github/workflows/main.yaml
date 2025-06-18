@@ -80,6 +80,11 @@ jobs:
 
     - name: GitOps Sync (Deploy) Phase
       run: |
+
+        # Substitute all vars (note: PEM_CONTENTS must be handled as block literal)
+        sed "s|__VERSION__|${VERSION_TAG}|g" k8s_envelope/dasmlab-home_deploy.yaml > generated.yaml
+
+
         # Clone & update repo as usual...
         git config --global user.name "dasmlab-bot"
         git config --global user.email "ci@dasmlab.org"
