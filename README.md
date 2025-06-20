@@ -8,6 +8,8 @@ This service provides a live "Carousel" of media (A Queue) that can be obtained 
 
 Includes a Swagger Page API SDK page at   http://ip:port/swagger/index.html that lets you try the APIs out "live".
 
+Includes Image Preloader - allowing you to start with a set of images in a directory, regardless of format, loaded up and converted to wepb (optimized for internet style work/consumption)
+
 **[Live Site Active Link]**(https://design-carousel.svc.dasmlab.org/swagger/index.html)
 
 ---
