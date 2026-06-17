@@ -23,7 +23,7 @@ RUN swag init --generalInfo main.go --output docs
 
 # Build the binary
 RUN --mount=type=cache,target=/root/.cache/go-build \
-    CGO_ENABLED=0 GOOS=linux GOARCH=${ARCH} \
+    CGO_ENABLED=1 GOOS=linux GOARCH=${ARCH} \
     go build -ldflags "-s -w -extldflags '-static'" \
     -o design-carousel-service
 
