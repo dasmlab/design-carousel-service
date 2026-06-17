@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM golang:latest AS builder
+FROM docker.io/library/golang:latest AS builder
 
 WORKDIR /workspace
 
@@ -23,12 +23,12 @@ RUN swag init --generalInfo main.go --output docs
 
 # Build the binary
 RUN --mount=type=cache,target=/root/.cache/go-build \
-    CGO_ENABLED=1 GOOS=linux GOARCH=${ARCH} \
+    CGO_ENABLED=0 GOOS=linux GOARCH=${ARCH} \
     go build -ldflags "-s -w -extldflags '-static'" \
     -o design-carousel-service
 
 # Stage 2: Run
-FROM ubuntu:latest
+FROM docker.io/library/ubuntu:latest
 
 # Install CA certs for TLS (required to talk to GitHub)
 RUN apt-get update && apt-get install -y ca-certificates curl wget jq && rm -rf /var/lib/apt/lists/*
