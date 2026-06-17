@@ -33,12 +33,17 @@ FROM docker.io/library/ubuntu:latest
 # Install CA certs for TLS (required to talk to GitHub)
 RUN apt-get update && apt-get install -y ca-certificates curl wget jq && rm -rf /var/lib/apt/lists/*
 
-# Non-root for K8s security policies
-USER 65532
-
 WORKDIR /app
 COPY --from=builder /workspace/design-carousel-service .
 COPY --from=builder /workspace/preload_images /app/preload_images
+RUN mkdir -p /data/carousel_images \
+  && chown -R 65532:65532 /app /data
+
+# Non-root for K8s security policies
+USER 65532
+
+ENV CAROUSEL_DATA_DIR=/data \
+    CAROUSEL_PRELOAD_DIR=/app/preload_images
 EXPOSE 10022 9222
 
 ENTRYPOINT ["/app/design-carousel-service"]

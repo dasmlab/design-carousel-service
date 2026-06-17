@@ -10,9 +10,9 @@ import (
 	"github.com/Depado/ginprom"
 	"github.com/gin-contrib/cors"
 
-	"design-carousel-service/logutil"
+	"design-carousel-service/api"
 	"design-carousel-service/docs"
-//	"design-carousel-service/api"
+	"design-carousel-service/logutil"
 )
 
 // VARS
@@ -38,6 +38,10 @@ func main() {
 		storageBackend = "memory"
 	}
 	log.Infof("Using storage backend: %s", storageBackend)
+
+	if err := api.Initialize(); err != nil {
+		log.Fatalf("Storage initialization failed: %v", err)
+	}
 
 	// Main Router (API)
 	mainRouter := gin.Default()

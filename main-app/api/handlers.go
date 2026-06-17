@@ -34,20 +34,14 @@ type Slide struct {
 	CreatedAt time.Time `json:"created_at" example:"2025-06-15T20:12:34Z"`
 }
 
-// Thread-safe in-memory slide store
+// Thread-safe in-memory slide store (metadata persisted to manifest on PVC)
 var (
-	slideStore = make(map[string]Slide)
-	storeMu    sync.RWMutex
-	imageBasePath = "./carousel_images"
+	slideStore    = make(map[string]Slide)
+	storeMu       sync.RWMutex
+	imageBasePath string
 	componentName = "design-carousel-api"
-	log = logutil.InitLogger(componentName)
+	log           = logutil.InitLogger(componentName)
 )
-
-func init() {
-	os.MkdirAll(imageBasePath, 0755)
-	preloadDir := "./preload_images"
-	PreloadImagesFromDir(preloadDir)
-}
 
 //
 // 1. List all slides
@@ -186,6 +180,10 @@ func AddSlide(c *gin.Context) {
     slideStore[id] = slide
     storeMu.Unlock()
 
+    if err := persistManifest(); err != nil {
+        log.Warnf("AddSlide: failed to persist manifest: %v", err)
+    }
+
     log.Infof("AddSlide: Slide added (ID=%s, title=%s, url=%s)", id, title, slide.ImageURL)
     c.JSON(http.StatusCreated, slide)
 }
@@ -213,6 +211,10 @@ func DeleteSlide(c *gin.Context) {
 		return
 	}
 	delete(slideStore, id)
+	removeSlideImage(id)
+	if err := persistManifest(); err != nil {
+		log.Warnf("DeleteSlide: failed to persist manifest: %v", err)
+	}
 	c.Status(http.StatusNoContent)
 }
 

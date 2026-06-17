@@ -13,12 +13,28 @@ spec:
       labels:
         app: design-carousel-service
     spec:
+      securityContext:
+        fsGroup: 65532
+        fsGroupChangePolicy: OnRootMismatch
       imagePullSecrets:
         - name: dasmlab-ghcr-pull
       containers:
         - name: design-carousel-service
           image: ghcr.io/lmcdasm/design-carousel-service:__VERSION__
           imagePullPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+          env:
+            - name: CAROUSEL_DATA_DIR
+              value: /data
+            - name: CAROUSEL_PRELOAD_DIR
+              value: /app/preload_images
+          volumeMounts:
+            - name: carousel-data
+              mountPath: /data
           ports:
             - name: api
               containerPort: 10022
@@ -38,6 +54,23 @@ spec:
               port: api
             initialDelaySeconds: 15
             periodSeconds: 20
+      volumes:
+        - name: carousel-data
+          persistentVolumeClaim:
+            claimName: design-carousel-data
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: design-carousel-data
+  namespace: design-carousel-service-system
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
 
 ---
 apiVersion: v1
