@@ -13,6 +13,7 @@ spec:
       labels:
         app: design-carousel-service
     spec:
+      serviceAccountName: design-carousel-service-sa
       securityContext:
         fsGroup: 65532
         fsGroupChangePolicy: OnRootMismatch
@@ -72,6 +73,13 @@ spec:
   resources:
     requests:
       storage: 2Gi
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: design-carousel-service-sa
+  namespace: design-carousel-service-system
 
 ---
 apiVersion: v1
